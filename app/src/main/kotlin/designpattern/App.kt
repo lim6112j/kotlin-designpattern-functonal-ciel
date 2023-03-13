@@ -4,6 +4,9 @@
 package designpattern
 import designpattern.iterator.*
 import arrow.core.getOrElse
+import arrow.core.Either
+import arrow.core.Either.*
+
 fun main() {
   // iterator pattern
   println("\noop style iterator design pattern\n ---------------------------")
@@ -16,14 +19,27 @@ fun main() {
   // functional iterator pattern
   println("\nfunctional style iterator design pattern\n ----------------------------")
   val ffriends = FFriends(listOf(FFriend("ben", 22), FFriend("John", 20))) to 0
-  tailrec fun ffriendsRec(statefulFriends: Pair<FFriends, State>) : Unit =
+  val noFriends = FFriends(listOf()) to 0
+  val wrongFriends = FFriends(listOf(FFriend("", -2))) to 0
+  fun ffriendsRec(statefulFriends: Pair<FFriends, State>) : Unit =
       if(hasMore(statefulFriends.first, statefulFriends.second )){
-      val friend: Pair<FFriend, State> = next(statefulFriends).getOrElse { FFriend("",0) to 0 }
-      println("ffriend printing :  ${friend.first}")
-      val newStatefulFriends = statefulFriends.first to friend.second 
-      ffriendsRec(newStatefulFriends)
+      val friend  = next(statefulFriends)
+      when (friend) {
+        is Either.Right -> {
+          println("ffriend printing :  ${friend.value}")
+          val newStatefulFriends = statefulFriends.first to friend.value.second
+          ffriendsRec(newStatefulFriends)
+
+        }
+        is Either.Left -> println("error while getting friend: ${friend.value}")
+      }
       }
       else {println("end of friends\n")
     }
+  println("------------wrong friends --------------")
+  ffriendsRec(wrongFriends)
+  println("------------no friends --------------")
+  ffriendsRec(noFriends)
+  println("------------normal friends --------------")
   ffriendsRec(ffriends)
 }
