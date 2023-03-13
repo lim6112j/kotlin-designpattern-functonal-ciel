@@ -3,6 +3,7 @@
  */
 package designpattern
 import designpattern.iterator.*
+import arrow.core.getOrElse
 fun main() {
   // iterator pattern
   println("\noop style iterator design pattern\n ---------------------------")
@@ -14,14 +15,15 @@ fun main() {
   }
   // functional iterator pattern
   println("\nfunctional style iterator design pattern\n ----------------------------")
-  val ffriends = FFriends(listOf(FFriend("ben", 22), FFriend("John", 20)))
-  tailrec fun ffriendsRec() : Unit =
-      if(ffriends.hasMore()){
-      val friend = ffriends.next()
-      println("ffriend printing : name ${friend?.name}, aged ${friend?.age}")
-      ffriendsRec()
+  val ffriends = FFriends(listOf(FFriend("ben", 22), FFriend("John", 20))) to 0
+  tailrec fun ffriendsRec(statefulFriends: Pair<FFriends, State>) : Unit =
+      if(hasMore(statefulFriends.first, statefulFriends.second )){
+      val friend: Pair<FFriend, State> = next(statefulFriends).getOrElse { FFriend("",0) to 0 }
+      println("ffriend printing :  ${friend.first}")
+      val newStatefulFriends = statefulFriends.first to friend.second 
+      ffriendsRec(newStatefulFriends)
       }
       else {println("end of friends\n")
     }
-  ffriendsRec()
+  ffriendsRec(ffriends)
 }
